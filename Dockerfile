@@ -18,5 +18,8 @@ RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf
     && apt-get -y install $BLD_PKGS \
     && docker-php-ext-install $PHP_EXTS \
     && pecl install $PECL_EXT && docker-php-ext-enable $PECL_EXT
+    
+# change settings for php
+COPY development/php.ini /usr/local/etc/php/conf.d
 
 WORKDIR /var/www/
