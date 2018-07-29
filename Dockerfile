@@ -3,7 +3,7 @@ FROM php:7.1-apache
 ENV APACHE_DOCUMENT_ROOT /var/www/public
 
 # set the required
-ARG BLD_PKGS="libfreetype6-dev libjpeg62-turbo-dev libxml2-dev libmcrypt-dev libicu-dev unzip wget libz-dev libsasl2-dev libmagickwand-dev libmemcached-dev iputils-ping"
+ARG BLD_PKGS="libfreetype6-dev libjpeg62-turbo-dev libxml2-dev libmcrypt-dev libicu-dev unzip wget libz-dev libsasl2-dev libmagickwand-dev libmemcached-dev"
 ARG PHP_EXTS="pdo_mysql gd intl mcrypt"
 ARG PECL_EXT="mongodb"
 
@@ -17,6 +17,14 @@ RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf
     && apt-get update \
     && apt-get -y install $BLD_PKGS \
     && docker-php-ext-install $PHP_EXTS \
-    && pecl install $PECL_EXT && docker-php-ext-enable $PECL_EXT
+    && pecl install $PECL_EXT && docker-php-ext-enable $PECL_EXT \
+    && version=$(php -r "echo PHP_MAJOR_VERSION.PHP_MINOR_VERSION;") \
+    && curl -A "Docker" -o /tmp/blackfire-probe.tar.gz -D - -L -s https://blackfire.io/api/v1/releases/probe/php/linux/amd64/$version \
+    && mkdir -p /tmp/blackfire \
+    && tar zxpf /tmp/blackfire-probe.tar.gz -C /tmp/blackfire \
+    && mv /tmp/blackfire/blackfire-*.so $(php -r "echo ini_get('extension_dir');")/blackfire.so \
+    && printf "extension=blackfire.so\nblackfire.agent_socket=tcp://blackfire:8707\n" > $PHP_INI_DIR/conf.d/blackfire.ini \
+    && rm -rf /tmp/blackfire /tmp/blackfire-probe.tar.gz \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /var/www/
