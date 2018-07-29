@@ -27,4 +27,7 @@ RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf
     && rm -rf /tmp/blackfire /tmp/blackfire-probe.tar.gz \
     && rm -rf /var/lib/apt/lists/*
 
+# change settings for php
+COPY development/php.ini /usr/local/etc/php/conf.d
+
 WORKDIR /var/www/
