@@ -1,4 +1,4 @@
-FROM jasonmccallister/php-apache:latest
+FROM danishdewani/php7.4-apache:latest
 
 ARG PECL_EXT="xdebug"
 
